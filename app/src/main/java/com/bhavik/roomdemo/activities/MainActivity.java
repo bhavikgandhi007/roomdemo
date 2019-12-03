@@ -1,6 +1,7 @@
 package com.bhavik.roomdemo.activities;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +15,9 @@ import com.bhavik.roomdemo.R;
 import com.bhavik.roomdemo.adaptors.PersonAdaptor;
 import com.bhavik.roomdemo.database.AppDatabase;
 import com.bhavik.roomdemo.database.AppExecutors;
+import com.bhavik.roomdemo.database.CompanyDatabase;
+import com.bhavik.roomdemo.model.Company;
+import com.bhavik.roomdemo.model.Department;
 import com.bhavik.roomdemo.model.Person;
 
 import java.util.List;
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private PersonAdaptor mAdapter;
     private AppDatabase mDb;
+    private CompanyDatabase companyDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
                         List<Person> tasks = mAdapter.getTasks();
                         mDb.personDao().delete(tasks.get(position));
                         retrieveTasks();
+
+                        addCompanyDepartement(MainActivity.this);
                     }
                 });
             }
@@ -91,6 +98,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+
+    private void addCompanyDepartement(Context context) {
+        companyDatabase = CompanyDatabase.getInstance(context);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                Company company  = new Company("Test one");
+                long companyID = companyDatabase.companyDao().insertCompany(company);
+
+
+                Department department = new Department((int) companyID,"Test Departemnt");
+                companyDatabase.departmntDao().insertDepartment(department);
+            }
+        });
 
     }
 }
